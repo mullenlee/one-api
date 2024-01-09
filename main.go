@@ -62,6 +62,14 @@ func main() {
 		logger.FatalLog("failed to initialize Redis: " + err.Error())
 	}
 
+	// Initialize ES
+	err = common.InitESClient()
+	if err != nil {
+		common.FatalLog("failed to initialize Es: " + err.Error())
+	}
+
+	common.SearchDocs()
+
 	// Initialize options
 	model.InitOptionMap()
 	logger.SysLog(fmt.Sprintf("using theme %s", config.Theme))

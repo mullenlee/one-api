@@ -3,7 +3,7 @@ package common
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v7"
 	"log"
 	"os"
 	"strings"
@@ -22,7 +22,7 @@ func InitESClient() (error error) {
 	SysLog("ES is enabled")
 
 	cfg := elasticsearch.Config{
-		Addresses: []string{"ES_CONN_STRING"},
+		Addresses: []string{os.Getenv("ES_CONN_STRING")},
 	}
 
 	ES, err := elasticsearch.NewClient(cfg)
@@ -30,16 +30,17 @@ func InitESClient() (error error) {
 		log.Fatalf("Error creating the client: %s", err)
 	}
 
-	// use Ping() method check Elasticsearch
-	_, err = ES.Ping()
+	esInfo, err := ES.Info()
 	if err != nil {
 		return err
 	}
 
+	SysLog("ES_CONNED , INFO IS " + esInfo.String())
+
 	return err
 }
 
-func indexingDocs() {
+func IndexingDocs() {
 	document := struct {
 		Name string `json:"name"`
 	}{
@@ -49,26 +50,26 @@ func indexingDocs() {
 	ES.Index("my_index", bytes.NewReader(data))
 }
 
-func gettingDocs() {
+func GettingDocs() {
 	ES.Get("my_index", "id")
 }
 
-func searchDocs() {
+func SearchDocs() {
 	query := `{ "query": { "match_all": {} } }`
 	ES.Search(
-		ES.Search.WithIndex("my_index"),
+		ES.Search.WithIndex("services"),
 		ES.Search.WithBody(strings.NewReader(query)),
 	)
 }
 
-func updatingDocs() {
+func UpdatingDocs() {
 	ES.Update("my_index", "id", strings.NewReader(`{doc: { language: "Go" }}`))
 }
 
-func deletingDocs() {
+func DeletingDocs() {
 	ES.Delete("my_index", "id")
 }
 
-func deleteIndex() {
+func DeleteIndex() {
 	ES.Indices.Delete([]string{"my_index"})
 }
