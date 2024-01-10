@@ -68,8 +68,6 @@ func main() {
 		common.FatalLog("failed to initialize Es: " + err.Error())
 	}
 
-	common.SearchDocs()
-
 	// Initialize options
 	model.InitOptionMap()
 	logger.SysLog(fmt.Sprintf("using theme %s", config.Theme))
