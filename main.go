@@ -114,9 +114,6 @@ func main() {
 
 	router.SetRouter(server, buildFS)
 
-	// Initialize model access log store
-	server.Use(middleware.StoreLog())
-
 	var port = os.Getenv("PORT")
 	if port == "" {
 		port = strconv.Itoa(*common.Port)
