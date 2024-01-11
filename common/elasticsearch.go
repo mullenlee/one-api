@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 var ES *elasticsearch.Client
@@ -70,18 +71,46 @@ func initIndex() {
 
 }
 
-func IndexingDocs() {
+func IndexingDocs(reqId string, status bool, message string, channelType int, channelId int,
+	tokenId int, userId int, group string, model string, maxToken int, temperature float64,
+	frequencyPenalty float64, presencePenalty float64, now time.Time) {
 	//Build the request body.
 	document := struct {
-		Name string
+		ReqId            string
+		Status           bool
+		Message          string
+		ChannelType      int
+		ChannelId        int
+		TokenId          int
+		UserId           int
+		Group            string
+		Model            string
+		MaxToken         int
+		Temperature      float64
+		FrequencyPenalty float64
+		PresencePenalty  float64
+		Now              time.Time
 	}{
-		Name: "go-elasticsearch",
+		ReqId:            reqId,
+		Status:           status,
+		Message:          message,
+		ChannelType:      channelType,
+		ChannelId:        channelId,
+		TokenId:          tokenId,
+		UserId:           userId,
+		Group:            group,
+		Model:            model,
+		MaxToken:         maxToken,
+		Temperature:      temperature,
+		FrequencyPenalty: frequencyPenalty,
+		PresencePenalty:  presencePenalty,
+		Now:              now,
 	}
 	data, _ := json.Marshal(document)
 	//Set up the request object.
 	req := esapi.IndexRequest{
 		Index:      "one-api",
-		DocumentID: "1",
+		DocumentID: reqId,
 		Body:       bytes.NewReader(data),
 		Refresh:    "true",
 	}
