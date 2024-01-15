@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/gin-gonic/gin"
 	"log"
 	"os"
 	"strings"
@@ -148,10 +147,32 @@ func SearchDocs(index string, query string) {
 }
 
 // 示例函数，用于查询"one-api"中的数据，你需要根据实际情况实现该函数
-func QueryOneAPI(group string, count string, typeParam bool) (interface{}, error) {
-	// 在这里实现查询逻辑，返回查询结果或错误
-	// 这里只是一个示例，返回了固定的数据
-	return gin.H{"group": group, "count": count, "type": typeParam}, nil
+func QueryOneAPI(channelId string) (interface{}, error) {
+	req := esapi.SearchRequest{
+		Index: []string{"one-api"}, // 索引名
+		Body: strings.NewReader(`{
+ 		"_source": ["*"], 
+ 		"query": { "match": { "ChannelId": ` + channelId + ` } } 
+ 		}`),
+	}
+	res, err := req.Do(context.Background(), ES)
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
+	}
+	defer res.Body.Close()
+	if res.Body == nil {
+		log.Fatal("Response body is nil")
+	}
+	b := &bytes.Buffer{} // 假设你使用bytes.Buffer作为写入器
+	if _, err := b.ReadFrom(res.Body); err != nil {
+		log.Fatalf("Error reading the response body: %s", err)
+	}
+	var response Response
+	err = json.Unmarshal(b.Bytes(), &response) // 解析JSON数据到Response结构体中
+	if err != nil {
+		log.Fatalf("Error parsing the response body: %s", err)
+	}
+	return response.Hits, nil // 返回查询结果或错误（注意：这里直接返回了查询结果，没有错误处理）
 }
 
 func UpdatingDocs() {
@@ -164,4 +185,23 @@ func DeletingDocs() {
 
 func DeleteIndex() {
 	ES.Indices.Delete([]string{"my_index"})
+}
+
+type Response struct {
+	Took     int  `json:"took"`
+	TimedOut bool `json:"timed_out"`
+	Shards   struct {
+		Total      int `json:"total"`
+		Successful int `json:"successful"`
+		Skipped    int `json:"skipped"`
+		Failed     int `json:"failed"`
+	} `json:"_shards"`
+	Hits struct {
+		Total struct {
+			Value    int    `json:"value"`
+			Relation string `json:"relation"`
+		} `json:"total"`
+		MaxScore float64                  `json:"max_score"`
+		Hits     []map[string]interface{} `json:"hits"`
+	} `json:"hits"`
 }
