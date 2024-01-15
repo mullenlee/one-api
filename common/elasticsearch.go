@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/gin-gonic/gin"
 	"log"
 	"os"
 	"strings"
@@ -144,6 +145,13 @@ func SearchDocs(index string, query string) {
 		ES.Search.WithIndex(index),
 		ES.Search.WithBody(strings.NewReader(query)),
 	)
+}
+
+// 示例函数，用于查询"one-api"中的数据，你需要根据实际情况实现该函数
+func QueryOneAPI(group string, count string, typeParam bool) (interface{}, error) {
+	// 在这里实现查询逻辑，返回查询结果或错误
+	// 这里只是一个示例，返回了固定的数据
+	return gin.H{"group": group, "count": count, "type": typeParam}, nil
 }
 
 func UpdatingDocs() {
