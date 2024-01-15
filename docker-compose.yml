@@ -47,26 +47,3 @@ services:
       MYSQL_USER: oneapi   # 创建专用用户
       MYSQL_PASSWORD: '123456'    # 设置专用用户密码
       MYSQL_DATABASE: one-api   # 自动创建数据库
-
-  es:
-    image: elasticsearch:7.17.7
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    container_name: "elasticsearch"
-    environment:
-      # 单节点
-      - discovery.type=single-node
-      - "- ES_JAVA_OPTS=-Xms2G -Xmx4G"
-    volumes:
-      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
-      - ./data/elasticsearch/plugins:/usr/share/elasticsearch/plugins
-
-  kibana:
-      image: kibana:7.17.7
-      ports:
-        - "5601:5601"
-      container_name: "kibana"
-      #restart: always
-      depends_on:
-        - elasticsearch

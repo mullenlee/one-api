@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  es:
+    image: elasticsearch:7.17.7
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    container_name: "elasticsearch"
+    environment:
+      # 单节点
+      - discovery.type=single-node
+      - "- ES_JAVA_OPTS=-Xms2G -Xmx4G"
+    volumes:
+      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+
+  kibana:
+      image: kibana:7.17.7
+      ports:
+        - "5601:5601"
+      container_name: "kibana"
+      #restart: always
+      depends_on:
+        - elasticsearch
