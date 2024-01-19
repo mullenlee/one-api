@@ -172,7 +172,7 @@ func QueryOneAPI(channelId string) (interface{}, error) {
 	if err != nil {
 		log.Fatalf("Error parsing the response body: %s", err)
 	}
-	return response.Hits, nil // 返回查询结果或错误（注意：这里直接返回了查询结果，没有错误处理）
+	return response.Hits.Hits, nil // 返回查询结果或错误（注意：这里直接返回了查询结果，没有错误处理）
 }
 
 func UpdatingDocs() {
