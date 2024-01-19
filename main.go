@@ -113,7 +113,6 @@ func main() {
 	server.Use(sessions.Sessions("session", store))
 
 	router.SetRouter(server, buildFS)
-
 	var port = os.Getenv("PORT")
 	if port == "" {
 		port = strconv.Itoa(*common.Port)
