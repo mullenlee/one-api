@@ -153,13 +153,14 @@ func QueryOneAPI(channelId string, model string) (interface{}, error) {
 		Body: strings.NewReader(`{
  		"_source": ["*"], 
  		"query":  {
-    "bool": {
-      "must": [
-        {"match": {"Model": ` + model + `}},
-        {"match": {"ChannelId": ` + channelId + `}}
-      ]
-    }
-  } `),
+          "bool": {
+            "must": [
+               {"match": {"Model": "` + model + `"}},
+               {"match": {"ChannelId": ` + channelId + `}}
+            ]
+          }
+		} 
+		}`),
 	}
 	res, err := req.Do(context.Background(), ES)
 	if err != nil {
