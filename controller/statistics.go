@@ -45,6 +45,7 @@ func StoreLog(c *gin.Context, relayMode int, resp *http.Response, err error, tex
 func ChatStatistics(c *gin.Context) {
 	// 解析URL参数
 	channelId := c.Query("channelId") //渠道
+	model := c.Query("model")         //模型
 
 	// 检查参数是否有效，这里可以根据你的需求进行更详细的验证
 	if channelId == "" {
@@ -53,7 +54,7 @@ func ChatStatistics(c *gin.Context) {
 	}
 
 	// 使用参数查询"one-api"中的数据，这里是一个示例函数，你需要替换为实际的查询逻辑
-	data, err := common.QueryOneAPI(channelId)
+	data, err := common.QueryOneAPI(channelId, model)
 	jsonStr, _ := json.Marshal(data)
 	var jsonData interface{}
 	err = json.Unmarshal([]byte(jsonStr), &jsonData)

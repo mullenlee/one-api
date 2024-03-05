@@ -147,13 +147,19 @@ func SearchDocs(index string, query string) {
 }
 
 // 示例函数，用于查询"one-api"中的数据，你需要根据实际情况实现该函数
-func QueryOneAPI(channelId string) (interface{}, error) {
+func QueryOneAPI(channelId string, model string) (interface{}, error) {
 	req := esapi.SearchRequest{
 		Index: []string{"one-api"}, // 索引名
 		Body: strings.NewReader(`{
  		"_source": ["*"], 
- 		"query": { "match": { "ChannelId": ` + channelId + ` } } 
- 		}`),
+ 		"query":  {
+    "bool": {
+      "must": [
+        {"match": {"Model": ` + model + `}},
+        {"match": {"ChannelId": ` + channelId + `}}
+      ]
+    }
+  } `),
 	}
 	res, err := req.Do(context.Background(), ES)
 	if err != nil {
