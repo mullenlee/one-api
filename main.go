@@ -65,7 +65,7 @@ func main() {
 	// Initialize ES
 	err = common.InitESClient()
 	if err != nil {
-		common.FatalLog("failed to initialize Es: " + err.Error())
+		logger.FatalLog("failed to initialize Es: " + err.Error())
 	}
 
 	// Initialize options

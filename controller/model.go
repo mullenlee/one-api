@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/songquanpeng/one-api/common"
+	"github.com/songquanpeng/one-api/common/config"
+	"github.com/songquanpeng/one-api/model"
 	"github.com/songquanpeng/one-api/relay/channel/openai"
 	"github.com/songquanpeng/one-api/relay/constant"
 	"github.com/songquanpeng/one-api/relay/helper"
 	relaymodel "github.com/songquanpeng/one-api/relay/model"
 	"github.com/songquanpeng/one-api/relay/util"
 	"net/http"
+	"strconv"
 )
 
 // https://platform.openai.com/docs/api-reference/models/list
@@ -124,7 +127,7 @@ func ListModels(c *gin.Context) {
 	if p < 0 {
 		p = 0
 	}
-	channels, err := model.GetAllChannels(p*common.ItemsPerPage, common.ItemsPerPage, false)
+	channels, err := model.GetAllChannels(p*config.ItemsPerPage, config.ItemsPerPage, "Limited")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,

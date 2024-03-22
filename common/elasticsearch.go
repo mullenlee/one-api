@@ -20,10 +20,10 @@ var IndexOneAPi = "one-api"
 func InitESClient() (error error) {
 	if os.Getenv("ES_CONN_STRING") == "" {
 		EsEnabled = false
-		SysLog("ES_CONN_STRING not set, ES is not enabled")
+		log.Print("ES_CONN_STRING not set, ES is not enabled")
 		return nil
 	}
-	SysLog("ES is enabled")
+	log.Printf("ES is enabled")
 
 	cfg := elasticsearch.Config{
 		Addresses: []string{os.Getenv("ES_CONN_STRING")},
