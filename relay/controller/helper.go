@@ -15,6 +15,14 @@ import (
 	"github.com/songquanpeng/one-api/relay/util"
 	"math"
 	"net/http"
+	"os"
+	"sync"
+)
+
+// 定义一个全局的消息集合和互斥锁来确保并发安全
+var (
+	messageSet  = make(map[string]struct{})
+	messageLock = sync.Mutex{}
 )
 
 func getAndValidateTextRequest(c *gin.Context, relayMode int) (*relaymodel.GeneralOpenAIRequest, error) {
@@ -98,6 +106,12 @@ func getImageCostRatio(imageRequest *openai.ImageRequest) (float64, error) {
 func getPromptTokens(textRequest *relaymodel.GeneralOpenAIRequest, relayMode int) int {
 	switch relayMode {
 	case constant.RelayModeChatCompletions:
+
+		// 启动goroutine来异步处理日志保存
+		//messages := make([]string, 0, len(textRequest.Messages))
+		prompt_all := fmt.Sprintf("%v", textRequest.Messages)
+		logger.SysLog(fmt.Sprintf("prompt content: %T%v", prompt_all, prompt_all))
+		go saveUniqueMessage(prompt_all)
 		return openai.CountTokenMessages(textRequest.Messages, textRequest.Model)
 	case constant.RelayModeCompletions:
 		return openai.CountTokenInput(textRequest.Prompt, textRequest.Model)
@@ -105,6 +119,41 @@ func getPromptTokens(textRequest *relaymodel.GeneralOpenAIRequest, relayMode int
 		return openai.CountTokenInput(textRequest.Input, textRequest.Model)
 	}
 	return 0
+}
+
+// saveUniqueMessage 保存独特的消息到日志文件中
+func saveUniqueMessage(prompt_all string) {
+	messageLock.Lock()
+	defer messageLock.Unlock()
+
+	// 检查消息是否已经存在
+	if _, exists := messageSet[prompt_all]; exists {
+		// 如果消息已经存在，不再写入文件
+		return
+	}
+
+	// 消息不存在，标记为已存在
+	messageSet[prompt_all] = struct{}{}
+
+	// 然后将其写入文件
+	appendToFile(prompt_all)
+}
+
+// appendToFile 追加文本到文件中
+func appendToFile(prompt_all string) {
+	file, err := os.OpenFile("prompt_log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		// 无法打开文件，处理错误，例如打印到标准错误或日志
+		fmt.Printf("无法打开prompt日志文件：%v", err)
+		return
+	}
+	defer file.Close()
+
+	// 写入消息到文件
+	if _, err := file.WriteString(prompt_all + "\n"); err != nil {
+		// 写入时出错，处理错误
+		fmt.Printf("无法写入日志文件：%v", err)
+	}
 }
 
 func getPreConsumedQuota(textRequest *relaymodel.GeneralOpenAIRequest, promptTokens int, ratio float64) int64 {
