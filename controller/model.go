@@ -132,10 +132,22 @@ func ListModels(c *gin.Context) {
 		})
 		return
 	}
+	// 使用map根据name去重
+	var uniqueChannels = make(map[string]*model.Channel) // 假设YourChannelType是channels中元素的类型
+	for _, channel := range channels {
+		uniqueChannels[channel.Name] = channel // 将channel的Name作为键，channel本身作为值存储到map中
+	}
+
+	// 将map的值转换回切片
+	var uniqueChannelsSlice []*model.Channel // 根据YourChannelType调整切片类型
+	for _, channel := range uniqueChannels {
+		uniqueChannelsSlice = append(uniqueChannelsSlice, channel)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    channels,
+		"data":    uniqueChannelsSlice, // 这里返回去重后的uniqueChannelsSlice
 	})
 }
 
