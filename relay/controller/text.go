@@ -15,6 +15,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func RelayTextHelper(c *gin.Context) *model.ErrorWithStatusCode {
@@ -91,6 +92,9 @@ func RelayTextHelper(c *gin.Context) *model.ErrorWithStatusCode {
 	}
 	meta.IsStream = meta.IsStream || strings.HasPrefix(resp.Header.Get("Content-Type"), "text/event-stream")
 
+	// store es log
+	go StoreLog(c, meta.Mode, resp, err, textRequest)
+
 	// do response
 	usage, respErr := adaptor.DoResponse(c, resp, meta)
 	if respErr != nil {
@@ -101,4 +105,38 @@ func RelayTextHelper(c *gin.Context) *model.ErrorWithStatusCode {
 	// post-consume quota
 	go postConsumeQuota(ctx, usage, meta, textRequest, ratio, preConsumedQuota, modelRatio, groupRatio)
 	return nil
+}
+
+func StoreLog(c *gin.Context, relayMode int, resp *http.Response, err error, textRequest *model.GeneralOpenAIRequest) {
+	if relayMode != constant.RelayModeChatCompletions {
+		return
+	}
+
+	status := true
+	message := ""
+
+	if err != nil || resp == nil {
+		// access fail
+		status = false
+		message = err.Error()
+	}
+
+	reqId := c.Request.Header.Get("X-Request-Id")
+
+	channelType := c.GetInt("channel")
+	channelId := c.GetInt("channel_id")
+	tokenId := c.GetInt("token_id")
+	userId := c.GetInt("id")
+	group := c.GetString("group")
+
+	model := textRequest.Model
+
+	maxToken := textRequest.MaxTokens
+	temperature := textRequest.Temperature
+	frequencyPenalty := textRequest.FrequencyPenalty
+	presencePenalty := textRequest.PresencePenalty
+	now := time.Now()
+
+	common.IndexingDocs(reqId, status, message, channelType, channelId, tokenId, userId, group,
+		model, maxToken, temperature, frequencyPenalty, presencePenalty, now)
 }

@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/songquanpeng/one-api/common"
+	"github.com/songquanpeng/one-api/common/config"
+	"github.com/songquanpeng/one-api/model"
 	"github.com/songquanpeng/one-api/relay/channel/openai"
 	"github.com/songquanpeng/one-api/relay/constant"
 	"github.com/songquanpeng/one-api/relay/helper"
 	relaymodel "github.com/songquanpeng/one-api/relay/model"
 	"github.com/songquanpeng/one-api/relay/util"
 	"net/http"
+	"strconv"
 )
 
 // https://platform.openai.com/docs/api-reference/models/list
@@ -120,9 +123,34 @@ func DashboardListModels(c *gin.Context) {
 }
 
 func ListModels(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"object": "list",
-		"data":   openAIModels,
+	p, _ := strconv.Atoi(c.Query("p"))
+	if p < 0 {
+		p = 0
+	}
+	channels, err := model.GetAllChannels(p*config.ItemsPerPage, config.ItemsPerPage, "Limited")
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	// 使用map根据name去重
+	var uniqueChannels = make(map[string]*model.Channel) // 假设YourChannelType是channels中元素的类型
+	for _, channel := range channels {
+		uniqueChannels[channel.Name] = channel // 将channel的Name作为键，channel本身作为值存储到map中
+	}
+
+	// 将map的值转换回切片
+	var uniqueChannelsSlice []*model.Channel // 根据YourChannelType调整切片类型
+	for _, channel := range uniqueChannels {
+		uniqueChannelsSlice = append(uniqueChannelsSlice, channel)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    uniqueChannelsSlice, // 这里返回去重后的uniqueChannelsSlice
 	})
 }
 
