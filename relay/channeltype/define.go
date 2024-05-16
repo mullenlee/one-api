@@ -42,5 +42,6 @@ const (
 	DeepL
 	TogetherAI
 	Doubao
+	Perplexity
 	Dummy
 )

@@ -5,6 +5,7 @@ import (
 	"github.com/songquanpeng/one-api/relay/adaptor/baichuan"
 	"github.com/songquanpeng/one-api/relay/adaptor/deepseek"
 	"github.com/songquanpeng/one-api/relay/adaptor/doubao"
+	"github.com/songquanpeng/one-api/relay/adaptor/perplexity"
 	"github.com/songquanpeng/one-api/relay/adaptor/groq"
 	"github.com/songquanpeng/one-api/relay/adaptor/lingyiwanwu"
 	"github.com/songquanpeng/one-api/relay/adaptor/minimax"
@@ -22,6 +23,7 @@ var CompatibleChannels = []int{
 	channeltype.Baichuan,
 	channeltype.Minimax,
 	channeltype.Doubao,
+	channeltype.Perplexity,
 	channeltype.Mistral,
 	channeltype.Groq,
 	channeltype.LingYiWanWu,
@@ -56,6 +58,8 @@ func GetCompatibleChannelMeta(channelType int) (string, []string) {
 		return "together.ai", togetherai.ModelList
 	case channeltype.Doubao:
 		return "doubao", doubao.ModelList
+	case channeltype.Perplexity:
+		return "perplexity", perplexity.ModelList
 	default:
 		return "openai", ModelList
 	}

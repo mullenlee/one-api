@@ -42,6 +42,7 @@ var ChannelBaseURLs = []string{
 	"https://api-free.deepl.com",                // 38
 	"https://api.together.xyz",                  // 39
 	"https://ark.cn-beijing.volces.com",         // 40
+	"https://api.perplexity.ai",                 // 41
 }
 
 func init() {

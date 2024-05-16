@@ -110,6 +110,7 @@ func RelayTextHelper(c *gin.Context) *model.ErrorWithStatusCode {
 }
 
 func StoreLog(c *gin.Context, relayMode int, resp *http.Response, err error, textRequest *model.GeneralOpenAIRequest) {
+	return
 	if relayMode != relaymode.ChatCompletions {
 		return
 	}
